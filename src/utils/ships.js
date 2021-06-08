@@ -5,10 +5,10 @@ export const isValidPosition = ({ x, y }) => {
   return x >= 0 && x <= 9 && y >= 0 && y <= 9;
 };
 
-export const generateValidation = ({ x, y }) => {
+export const searchClosure = ({ x, y }) => {
   return (ship) =>
     ship.positions.find((position) => position.x === x && position.y === y);
-}
+};
 
 export const buildShips = (ship, isEmptyCb) => {
   const buildedShips = [];
@@ -43,6 +43,7 @@ export const buildShips = (ship, isEmptyCb) => {
     const completedShip = {
       label: ship.NAME,
       size: ship.LENGTH,
+      destroyed: false,
       positions,
     };
 

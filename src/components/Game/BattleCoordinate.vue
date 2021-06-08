@@ -57,7 +57,7 @@ export default {
         this.handleError();
       }
 
-      this.$emit('click', this.possition);
+      this.$emit("click", this.possition);
     },
   },
 };

@@ -4,8 +4,10 @@
       <battle-coordinate
         v-for="(possition, indexColumn) in rows"
         :key="`possition-(${indexRow},${indexColumn})`"
+        :ref="`possition-(${indexRow},${indexColumn})`"
         :possition="{ x: possition.x, y: possition.y }"
         :isEmpty="isPositionEmpty(possition)"
+        @click="handleShoot"
       />
     </div>
   </div>
@@ -14,7 +16,7 @@
 <script>
 import BattleCoordinate from "./BattleCoordinate.vue";
 import { mapNTimes } from "@/utils/mapNTimes.js";
-import { buildShips, generateValidation } from "@/utils/ships.js";
+import { buildShips, searchClosure } from "@/utils/ships.js";
 import {
   BATTLESHIP,
   CRUISER,
@@ -44,7 +46,7 @@ export default {
   },
   methods: {
     isPositionEmpty({ x, y }) {
-      const validation = generateValidation({ x, y });
+      const validation = searchClosure({ x, y });
 
       return (
         !this.ships[BATTLESHIP.NAME].some(validation) &&
@@ -53,6 +55,34 @@ export default {
         !this.ships[DESTROYER.NAME].some(validation)
       );
     },
+    findByPosition({ x, y }) {
+      const search = searchClosure({ x, y });
+
+      return (
+        this.ships[BATTLESHIP.NAME].find(search) ||
+        this.ships[CRUISER.NAME].find(search) ||
+        this.ships[SUBMARINE.NAME].find(search) ||
+        this.ships[DESTROYER.NAME].find(search)
+      );
+    },
+    handleShoot(payload) {
+      const ship = this.findByPosition(payload);
+
+      if (!ship) return;
+
+      const position = ship.positions.find(
+        (p) => p.x === payload.x && p.y === payload.y
+      );
+
+      position.hit = true;
+      ship.destroyed = ship.positions.reduce((acc, p) => acc && p.hit, true);
+
+      if (!ship.destroyed) return;
+
+      ship.positions.forEach((pos) => {
+        this.$refs[`possition-(${pos.x},${pos.y})`][0].handleDestroyed();
+      });
+    },
   },
   created() {
     this.ships[BATTLESHIP.NAME] = buildShips(BATTLESHIP, this.isPositionEmpty);
@@ -60,26 +90,26 @@ export default {
     this.ships[SUBMARINE.NAME] = buildShips(SUBMARINE, this.isPositionEmpty);
     this.ships[DESTROYER.NAME] = buildShips(DESTROYER, this.isPositionEmpty);
 
-    // this.ships[BATTLESHIP.NAME].forEach(ships => {
-    //   ships.positions.forEach(p => {
-    //     console.log({...p});
-    //   })
-    // })
-    // this.ships[CRUISER.NAME].forEach(ships => {
-    //   ships.positions.forEach(p => {
-    //     console.log({...p});
-    //   })
-    // })
-    // this.ships[SUBMARINE.NAME].forEach(ships => {
-    //   ships.positions.forEach(p => {
-    //     console.log({...p});
-    //   })
-    // })
-    // this.ships[DESTROYER.NAME].forEach(ships => {
-    //   ships.positions.forEach(p => {
-    //     console.log({...p});
-    //   })
-    // })
+    // this.ships[BATTLESHIP.NAME].forEach((ships) => {
+    //   ships.positions.forEach((p) => {
+    //     console.log({ ...p });
+    //   });
+    // });
+    // this.ships[CRUISER.NAME].forEach((ships) => {
+    //   ships.positions.forEach((p) => {
+    //     console.log({ ...p });
+    //   });
+    // });
+    // this.ships[SUBMARINE.NAME].forEach((ships) => {
+    //   ships.positions.forEach((p) => {
+    //     console.log({ ...p });
+    //   });
+    // });
+    // this.ships[DESTROYER.NAME].forEach((ships) => {
+    //   ships.positions.forEach((p) => {
+    //     console.log({ ...p });
+    //   });
+    // });
   },
 };
 </script>
