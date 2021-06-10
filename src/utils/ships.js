@@ -24,24 +24,27 @@ export const buildShips = (ship, isEmptyCb) => {
         hit: false,
       };
 
-      if (!isValidPosition(initialPosition) && !isEmptyCb(initialPosition)) {
-        continue;
+      if (isValidPosition(initialPosition) && isEmptyCb(initialPosition)) {
+        const axisOptions = ["x", "y"];
+        const randomAxisDirection = randomBetweenZeroAnd(2);
+
+        const axis = axisOptions[randomAxisDirection];
+
+        const nextPositions = mapNTimes(ship.LENGTH - 1, (_n, index) => {
+          const next = {
+            ...initialPosition,
+            [axis]: initialPosition[axis] + index + 1,
+          };
+
+          if (isValidPosition(next) && isEmptyCb(next)) {
+            return next;
+          }
+        }).filter((next) => next);
+
+        positions = [initialPosition, ...nextPositions];
+
+        complete = positions.length === ship.LENGTH;
       }
-
-      const nextPositions = mapNTimes(ship.LENGTH - 1, (_n, index) => {
-        const next = {
-          ...initialPosition,
-          x: initialPosition.x + index + 1,
-        };
-
-        if (isValidPosition(next) && isEmptyCb(next)) {
-          return next;
-        }
-      }).filter((next) => next);
-
-      positions = [initialPosition, ...nextPositions];
-
-      complete = positions.length === ship.LENGTH;
     } while (!complete);
 
     const completedShip = {

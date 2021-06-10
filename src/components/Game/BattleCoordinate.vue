@@ -3,7 +3,9 @@
     class="battleship-cell"
     v-bind:class="coordStyles[state]"
     @click="handleClick"
-  ></div>
+  >
+    {{ possition.x }} , {{ possition.y }}
+  </div>
 </template>
 
 <script>
@@ -50,8 +52,6 @@ export default {
       this.state = DESTROYED;
     },
     handleClick() {
-      console.log("hola");
-
       if (!this.isEmpty) {
         this.handleSuccess();
       } else {

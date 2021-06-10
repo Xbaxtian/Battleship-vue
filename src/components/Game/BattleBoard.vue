@@ -32,6 +32,7 @@
       </tbody>
     </table>
     <div class="battleship-leyend">
+      <div class="battleship-leyend__title">SHIPS</div>
       <div class="ship-types">
         <div class="ship-container ship--battleship">
           <div
@@ -39,7 +40,7 @@
             :key="`battleship-${index}`"
             class="ship"
           >
-            <span
+            <div
               v-for="(shipPart, sIndex) in ship.positions"
               :key="`battleship-part-${sIndex}`"
               class="ship-part"
@@ -47,9 +48,48 @@
             />
           </div>
         </div>
-        <div class="ship-container ship--cruiser"></div>
-        <div class="ship-container ship--submarine"></div>
-        <div class="ship-container ship--destroyer"></div>
+        <div class="ship-container ship--cruiser">
+          <div
+            v-for="(ship, index) in ships['CRUISER']"
+            :key="`cruiser-${index}`"
+            class="ship"
+          >
+            <div
+              v-for="(shipPart, sIndex) in ship.positions"
+              :key="`cruiser-part-${sIndex}`"
+              class="ship-part"
+              v-bind:class="{ 'ship-part--hit': shipPart.hit }"
+            />
+          </div>
+        </div>
+        <div class="ship-container ship--submarine">
+          <div
+            v-for="(ship, index) in ships['SUBMARINE']"
+            :key="`submarine-${index}`"
+            class="ship"
+          >
+            <div
+              v-for="(shipPart, sIndex) in ship.positions"
+              :key="`submarine-part-${sIndex}`"
+              class="ship-part"
+              v-bind:class="{ 'ship-part--hit': shipPart.hit }"
+            />
+          </div>
+        </div>
+        <div class="ship-container ship--destroyer">
+          <div
+            v-for="(ship, index) in ships['DESTROYER']"
+            :key="`destroyer-${index}`"
+            class="ship"
+          >
+            <div
+              v-for="(shipPart, sIndex) in ship.positions"
+              :key="`destroyer-part-${sIndex}`"
+              class="ship-part"
+              v-bind:class="{ 'ship-part--hit': shipPart.hit }"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -171,13 +211,20 @@ export default {
 
   &-leyend {
     position: absolute;
-    left: 20px;
+    left: 15px;
     top: 50%;
+    width: 120px;
+
+    &__title {
+      text-align: left;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
   }
 
   &-board {
     margin: 0;
-    margin-left: 130px;
+    margin-left: 150px;
     border-collapse: collapse;
     cursor: default;
     display: inline-block;
@@ -200,15 +247,23 @@ export default {
 }
 
 .ship {
+  display: flex;
+  margin-right: 0.75rem;
+
   &-container {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     display: flex;
   }
 
   &-part {
     height: 8px;
     width: 8px;
-    background-color: $hit;
+    border: 1px solid $initial;
+    margin-right: 0.1rem;
+
+    &--hit {
+      background-color: $destroyed;
+    }
   }
 }
 </style>
