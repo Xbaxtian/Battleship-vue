@@ -1,6 +1,12 @@
 <template>
   <div class="home">
-    <battle-board />
+    <div class="container">
+      <div class="columns">
+        <div class="column is-full">
+          <battle-board />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 

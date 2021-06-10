@@ -24,6 +24,10 @@ export const buildShips = (ship, isEmptyCb) => {
         hit: false,
       };
 
+      if (!isValidPosition(initialPosition) && !isEmptyCb(initialPosition)) {
+        continue;
+      }
+
       const nextPositions = mapNTimes(ship.LENGTH - 1, (_n, index) => {
         const next = {
           ...initialPosition,

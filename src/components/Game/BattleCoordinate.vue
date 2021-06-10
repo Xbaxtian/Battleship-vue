@@ -1,10 +1,9 @@
 <template>
-  <button
-    :style="`background-color: ${coordStyles[state]}`"
-    v-on:click="handleClick"
-  >
-    {{ possition.x }} , {{ possition.y }}
-  </button>
+  <div
+    class="battleship-cell"
+    v-bind:class="coordStyles[state]"
+    @click="handleClick"
+  ></div>
 </template>
 
 <script>
@@ -32,10 +31,10 @@ export default {
   data() {
     return {
       coordStyles: {
-        [INITIAL]: "gray",
-        [SUCCESS]: "green",
-        [FAIL]: "red",
-        [DESTROYED]: "blue",
+        [INITIAL]: "is-initial",
+        [SUCCESS]: "is-hit",
+        [FAIL]: "is-fail",
+        [DESTROYED]: "is-destroyed",
       },
       state: INITIAL,
     };
@@ -51,6 +50,8 @@ export default {
       this.state = DESTROYED;
     },
     handleClick() {
+      console.log("hola");
+
       if (!this.isEmpty) {
         this.handleSuccess();
       } else {
@@ -62,3 +63,24 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+@import "@/assets/styles/variables.scss";
+
+.battleship-cell {
+  height: 2em;
+  width: 2em;
+}
+
+.is-hit {
+  background-color: $hit;
+}
+
+.is-fail {
+  background-color: $fail;
+}
+
+.is-destroyed {
+  background-color: $destroyed;
+}
+</style>

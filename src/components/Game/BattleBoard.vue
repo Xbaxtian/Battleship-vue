@@ -1,14 +1,56 @@
 <template>
-  <div>
-    <div v-for="(rows, indexRow) in positions" :key="`row-${indexRow}`">
-      <battle-coordinate
-        v-for="(possition, indexColumn) in rows"
-        :key="`possition-(${indexRow},${indexColumn})`"
-        :ref="`possition-(${indexRow},${indexColumn})`"
-        :possition="{ x: possition.x, y: possition.y }"
-        :isEmpty="isPositionEmpty(possition)"
-        @click="handleShoot"
-      />
+  <div class="battleship-wrapper">
+    <table class="battleship-board" cellspacing="0">
+      <thead>
+        <tr>
+          <th></th>
+          <th
+            v-for="(rows, indexRow) in positions"
+            :key="`row-${indexRow}`"
+            class="battleship-cell--column-header"
+          >
+            {{ String.fromCharCode(65 + indexRow) }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(rows, indexRow) in positions" :key="`row-${indexRow}`">
+          <th class="battleship-cell--row-header">{{ indexRow + 1 }}</th>
+          <td
+            v-for="(possition, indexColumn) in rows"
+            :key="`possition-(${indexRow},${indexColumn})`"
+            class="battleship-cell"
+          >
+            <battle-coordinate
+              :ref="`possition-(${indexRow},${indexColumn})`"
+              :possition="{ x: possition.x, y: possition.y }"
+              :isEmpty="isPositionEmpty(possition)"
+              @click="handleShoot"
+            />
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="battleship-leyend">
+      <div class="ship-types">
+        <div class="ship-container ship--battleship">
+          <div
+            v-for="(ship, index) in ships['BATTLESHIP']"
+            :key="`battleship-${index}`"
+            class="ship"
+          >
+            <span
+              v-for="(shipPart, sIndex) in ship.positions"
+              :key="`battleship-part-${sIndex}`"
+              class="ship-part"
+              v-bind:class="{ 'ship-part--hit': shipPart.hit }"
+            />
+          </div>
+        </div>
+        <div class="ship-container ship--cruiser"></div>
+        <div class="ship-container ship--submarine"></div>
+        <div class="ship-container ship--destroyer"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -90,26 +132,83 @@ export default {
     this.ships[SUBMARINE.NAME] = buildShips(SUBMARINE, this.isPositionEmpty);
     this.ships[DESTROYER.NAME] = buildShips(DESTROYER, this.isPositionEmpty);
 
-    // this.ships[BATTLESHIP.NAME].forEach((ships) => {
-    //   ships.positions.forEach((p) => {
-    //     console.log({ ...p });
-    //   });
-    // });
-    // this.ships[CRUISER.NAME].forEach((ships) => {
-    //   ships.positions.forEach((p) => {
-    //     console.log({ ...p });
-    //   });
-    // });
-    // this.ships[SUBMARINE.NAME].forEach((ships) => {
-    //   ships.positions.forEach((p) => {
-    //     console.log({ ...p });
-    //   });
-    // });
-    // this.ships[DESTROYER.NAME].forEach((ships) => {
-    //   ships.positions.forEach((p) => {
-    //     console.log({ ...p });
-    //   });
-    // });
+    this.ships[BATTLESHIP.NAME].forEach((ships) => {
+      ships.positions.forEach((p) => {
+        console.log({ ...p });
+      });
+    });
+    console.log("---");
+    this.ships[CRUISER.NAME].forEach((ships) => {
+      ships.positions.forEach((p) => {
+        console.log({ ...p });
+      });
+    });
+    console.log("---");
+    this.ships[SUBMARINE.NAME].forEach((ships) => {
+      ships.positions.forEach((p) => {
+        console.log({ ...p });
+      });
+    });
+    console.log("---");
+    this.ships[DESTROYER.NAME].forEach((ships) => {
+      ships.positions.forEach((p) => {
+        console.log({ ...p });
+      });
+    });
   },
 };
 </script>
+
+<style lang="scss" scoped>
+@import "@/assets/styles/variables.scss";
+
+.battleship {
+  &-wrapper {
+    overflow-x: auto;
+    position: relative;
+    display: inline-block;
+  }
+
+  &-leyend {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+  }
+
+  &-board {
+    margin: 0;
+    margin-left: 130px;
+    border-collapse: collapse;
+    cursor: default;
+    display: inline-block;
+    position: relative;
+  }
+
+  &-cell {
+    border: 1px solid $primary;
+    padding: 0;
+    margin: 0;
+
+    &--column-header {
+      padding-bottom: 0.75rem;
+    }
+
+    &--row-header {
+      padding-right: 1rem;
+    }
+  }
+}
+
+.ship {
+  &-container {
+    margin-bottom: 1rem;
+    display: flex;
+  }
+
+  &-part {
+    height: 8px;
+    width: 8px;
+    background-color: $hit;
+  }
+}
+</style>
