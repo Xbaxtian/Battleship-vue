@@ -1,5 +1,5 @@
 <template>
-  <div class="battleship-wrapper">
+  <div v-if="positions.length" class="battleship-wrapper">
     <table class="battleship-board" cellspacing="0">
       <thead>
         <tr>
@@ -22,6 +22,7 @@
             class="battleship-cell"
           >
             <battle-coordinate
+              :key="`possition-(${indexRow},${indexColumn})-${gameNumber}`"
               :ref="`possition-(${indexRow},${indexColumn})`"
               :possition="{ x: possition.x, y: possition.y }"
               :isEmpty="isPositionEmpty(possition)"
@@ -106,25 +107,48 @@ import {
   DESTROYER,
 } from "@/constants/ships.js";
 
-const positionsMap = mapNTimes(10, (x, rowIndex) => {
-  return mapNTimes(10, (y, colIndex) => ({
-    x: rowIndex,
-    y: colIndex,
-  }));
-});
+const getPositionsMap = () => {
+  return mapNTimes(10, (x, rowIndex) => {
+    return mapNTimes(10, (y, colIndex) => ({
+      x: rowIndex,
+      y: colIndex,
+    }));
+  });
+}
 
 export default {
   components: { BattleCoordinate },
+  props: {
+    turns: {
+      type: Number,
+      default: 1,
+    },
+  },
   data() {
     return {
-      positions: positionsMap,
+      positions: [],
       ships: {
         [BATTLESHIP.NAME]: [],
         [CRUISER.NAME]: [],
         [SUBMARINE.NAME]: [],
         [DESTROYER.NAME]: [],
       },
+      gameTurns: this.turns,
+      gameNumber: 0,
     };
+  },
+  computed: {
+    allDestroyed() {
+      const validation = (ship) =>
+        ship.positions.reduce((acc, position) => acc && position.hit, true);
+
+      return (
+        this.ships[BATTLESHIP.NAME].every(validation) &&
+        this.ships[CRUISER.NAME].every(validation) &&
+        this.ships[SUBMARINE.NAME].every(validation) &&
+        this.ships[DESTROYER.NAME].every(validation)
+      );
+    },
   },
   methods: {
     isPositionEmpty({ x, y }) {
@@ -147,10 +171,60 @@ export default {
         this.ships[DESTROYER.NAME].find(search)
       );
     },
+    handleTurns({ shooted }) {
+      if (shooted) {
+        return;
+      }
+
+      this.gameTurns -= 1;
+
+      if (this.allDestroyed) {
+        this.$swal({
+          title: "Game Over",
+          text: "You win!",
+          icon: "success",
+          customClass: {
+            popup: "pop-up",
+          },
+          showConfirmButton: true,
+          confirmButtonText: "Play Again!",
+          showCancelButton: true,
+        }).then(result => {
+          if (result.isConfirmed) {
+            this.initGame();
+          } else {
+            this.$router.push({ path: "/" });
+          }
+        });
+      }
+
+      if (!this.gameTurns) {
+        this.$swal({
+          title: "Game Over",
+          text: "You lose!",
+          icon: "error",
+          customClass: {
+            popup: "pop-up",
+          },
+          showConfirmButton: true,
+          confirmButtonText: "Play Again!",
+          showCancelButton: true,
+        }).then(result => {
+          if (result.isConfirmed) {
+            this.initGame();
+          } else {
+            this.$router.push({ path: "/" });
+          }
+        });
+      }
+    },
     handleShoot(payload) {
       const ship = this.findByPosition(payload);
 
-      if (!ship) return;
+      if (!ship) {
+        this.handleTurns(payload);
+        return;
+      }
 
       const position = ship.positions.find(
         (p) => p.x === payload.x && p.y === payload.y
@@ -159,42 +233,30 @@ export default {
       position.hit = true;
       ship.destroyed = ship.positions.reduce((acc, p) => acc && p.hit, true);
 
-      if (!ship.destroyed) return;
+      if (!ship.destroyed) {
+        this.handleTurns(payload);
+        return;
+      }
 
       ship.positions.forEach((pos) => {
         this.$refs[`possition-(${pos.x},${pos.y})`][0].handleDestroyed();
       });
+
+      this.handleTurns(payload);
+    },
+    initGame() {
+      this.gameTurns = this.turns;
+      this.positions = getPositionsMap();
+      this.gameNumber++;
+
+      this.ships[BATTLESHIP.NAME] = buildShips(BATTLESHIP, this.isPositionEmpty);
+      this.ships[CRUISER.NAME] = buildShips(CRUISER, this.isPositionEmpty);
+      this.ships[SUBMARINE.NAME] = buildShips(SUBMARINE, this.isPositionEmpty);
+      this.ships[DESTROYER.NAME] = buildShips(DESTROYER, this.isPositionEmpty);
     },
   },
   created() {
-    this.ships[BATTLESHIP.NAME] = buildShips(BATTLESHIP, this.isPositionEmpty);
-    this.ships[CRUISER.NAME] = buildShips(CRUISER, this.isPositionEmpty);
-    this.ships[SUBMARINE.NAME] = buildShips(SUBMARINE, this.isPositionEmpty);
-    this.ships[DESTROYER.NAME] = buildShips(DESTROYER, this.isPositionEmpty);
-
-    this.ships[BATTLESHIP.NAME].forEach((ships) => {
-      ships.positions.forEach((p) => {
-        console.log({ ...p });
-      });
-    });
-    console.log("---");
-    this.ships[CRUISER.NAME].forEach((ships) => {
-      ships.positions.forEach((p) => {
-        console.log({ ...p });
-      });
-    });
-    console.log("---");
-    this.ships[SUBMARINE.NAME].forEach((ships) => {
-      ships.positions.forEach((p) => {
-        console.log({ ...p });
-      });
-    });
-    console.log("---");
-    this.ships[DESTROYER.NAME].forEach((ships) => {
-      ships.positions.forEach((p) => {
-        console.log({ ...p });
-      });
-    });
+    this.initGame();
   },
 };
 </script>

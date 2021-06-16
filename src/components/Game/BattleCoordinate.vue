@@ -4,7 +4,7 @@
     v-bind:class="coordStyles[state]"
     @click="handleClick"
   >
-    {{ possition.x }} , {{ possition.y }}
+    <!-- {{ isEmpty ? "" : "." }} -->
   </div>
 </template>
 
@@ -42,6 +42,9 @@ export default {
     };
   },
   methods: {
+    handleInitial() {
+      this.state = INITIAL;
+    },
     handleSuccess() {
       this.state = SUCCESS;
     },
@@ -52,14 +55,19 @@ export default {
       this.state = DESTROYED;
     },
     handleClick() {
+      const shooted = this.state !== INITIAL;
+
       if (!this.isEmpty) {
         this.handleSuccess();
       } else {
         this.handleError();
       }
 
-      this.$emit("click", this.possition);
+      this.$emit("click", { ...this.possition, shooted });
     },
+  },
+  mounted() {
+    this.state = INITIAL;
   },
 };
 </script>
